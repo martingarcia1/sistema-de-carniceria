@@ -1,0 +1,120 @@
+﻿Build started...
+Build succeeded.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT 1
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT [MigrationId], [ProductVersion]
+      FROM [__EFMigrationsHistory]
+      ORDER BY [MigrationId];
+info: Microsoft.EntityFrameworkCore.Migrations[20402]
+      Applying migration '20260410193611_InitialCreate'.
+Applying migration '20260410193611_InitialCreate'.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Productos] (
+          [Id] int NOT NULL IDENTITY,
+          [Nombre] nvarchar(100) NOT NULL,
+          [Tipo] int NOT NULL,
+          [StockKg] decimal(10,3) NOT NULL,
+          [Activo] bit NOT NULL,
+          CONSTRAINT [PK_Productos] PRIMARY KEY ([Id])
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Elaboraciones] (
+          [Id] int NOT NULL IDENTITY,
+          [ProductoFinalId] int NOT NULL,
+          [KgProducidos] decimal(10,3) NOT NULL,
+          [Fecha] datetime2 NOT NULL,
+          [Observacion] nvarchar(max) NULL,
+          CONSTRAINT [PK_Elaboraciones] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_Elaboraciones_Productos_ProductoFinalId] FOREIGN KEY ([ProductoFinalId]) REFERENCES [Productos] ([Id]) ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Ingresos] (
+          [Id] int NOT NULL IDENTITY,
+          [ProductoId] int NOT NULL,
+          [Kg] decimal(10,3) NOT NULL,
+          [PrecioCostoKg] decimal(12,2) NOT NULL,
+          [PrecioTotalCompra] decimal(14,2) NOT NULL,
+          [Fecha] datetime2 NOT NULL,
+          [Observacion] nvarchar(max) NULL,
+          CONSTRAINT [PK_Ingresos] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_Ingresos_Productos_ProductoId] FOREIGN KEY ([ProductoId]) REFERENCES [Productos] ([Id]) ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Recetas] (
+          [Id] int NOT NULL IDENTITY,
+          [ProductoId] int NOT NULL,
+          [Descripcion] nvarchar(max) NOT NULL,
+          CONSTRAINT [PK_Recetas] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_Recetas_Productos_ProductoId] FOREIGN KEY ([ProductoId]) REFERENCES [Productos] ([Id]) ON DELETE CASCADE
+      );
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [Ventas] (
+          [Id] int NOT NULL IDENTITY,
+          [ProductoId] int NOT NULL,
+          [Kg] decimal(10,3) NOT NULL,
+          [PrecioVentaKg] decimal(12,2) NOT NULL,
+          [Total] decimal(14,2) NOT NULL,
+          [Fecha] datetime2 NOT NULL,
+          [Observacion] nvarchar(max) NULL,
+          CONSTRAINT [PK_Ventas] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_Ventas_Productos_ProductoId] FOREIGN KEY ([ProductoId]) REFERENCES [Productos] ([Id]) ON DELETE CASCADE
+      );
+fail: Microsoft.EntityFrameworkCore.Database.Command[20102]
+      Failed executing DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      CREATE TABLE [ElaboracionDetalles] (
+          [Id] int NOT NULL IDENTITY,
+          [ElaboracionId] int NOT NULL,
+          [InsumoId] int NOT NULL,
+          [KgConsumidos] decimal(10,3) NOT NULL,
+          CONSTRAINT [PK_ElaboracionDetalles] PRIMARY KEY ([Id]),
+          CONSTRAINT [FK_ElaboracionDetalles_Elaboraciones_ElaboracionId] FOREIGN KEY ([ElaboracionId]) REFERENCES [Elaboraciones] ([Id]) ON DELETE CASCADE,
+          CONSTRAINT [FK_ElaboracionDetalles_Productos_InsumoId] FOREIGN KEY ([InsumoId]) REFERENCES [Productos] ([Id]) ON DELETE CASCADE
+      );
+Failed executing DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+CREATE TABLE [ElaboracionDetalles] (
+    [Id] int NOT NULL IDENTITY,
+    [ElaboracionId] int NOT NULL,
+    [InsumoId] int NOT NULL,
+    [KgConsumidos] decimal(10,3) NOT NULL,
+    CONSTRAINT [PK_ElaboracionDetalles] PRIMARY KEY ([Id]),
+    CONSTRAINT [FK_ElaboracionDetalles_Elaboraciones_ElaboracionId] FOREIGN KEY ([ElaboracionId]) REFERENCES [Elaboraciones] ([Id]) ON DELETE CASCADE,
+    CONSTRAINT [FK_ElaboracionDetalles_Productos_InsumoId] FOREIGN KEY ([InsumoId]) REFERENCES [Productos] ([Id]) ON DELETE CASCADE
+);
+Microsoft.Data.SqlClient.SqlException (0x80131904): Introducing FOREIGN KEY constraint 'FK_ElaboracionDetalles_Productos_InsumoId' on table 'ElaboracionDetalles' may cause cycles or multiple cascade paths. Specify ON DELETE NO ACTION or ON UPDATE NO ACTION, or modify other FOREIGN KEY constraints.
+Could not create constraint or index. See previous errors.
+   at Microsoft.Data.SqlClient.SqlConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.SqlInternalConnection.OnError(SqlException exception, Boolean breakConnection, Action`1 wrapCloseInAction)
+   at Microsoft.Data.SqlClient.TdsParser.ThrowExceptionAndWarning(TdsParserStateObject stateObj, Boolean callerHasConnectionLock, Boolean asyncClose)
+   at Microsoft.Data.SqlClient.TdsParser.TryRun(RunBehavior runBehavior, SqlCommand cmdHandler, SqlDataReader dataStream, BulkCopySimpleResultSet bulkCopyHandler, TdsParserStateObject stateObj, Boolean& dataReady)
+   at Microsoft.Data.SqlClient.SqlCommand.RunExecuteNonQueryTds(String methodName, Boolean isAsync, Int32 timeout, Boolean asyncWrite)
+   at Microsoft.Data.SqlClient.SqlCommand.InternalExecuteNonQuery(TaskCompletionSource`1 completion, Boolean sendToPipe, Int32 timeout, Boolean& usedCache, Boolean asyncWrite, Boolean inRetry, String methodName)
+   at Microsoft.Data.SqlClient.SqlCommand.ExecuteNonQuery()
+   at Microsoft.EntityFrameworkCore.Storage.RelationalCommand.ExecuteNonQuery(RelationalCommandParameterObject parameterObject)
+   at Microsoft.EntityFrameworkCore.Migrations.MigrationCommand.ExecuteNonQuery(IRelationalConnection connection, IReadOnlyDictionary`2 parameterValues)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.MigrationCommandExecutor.ExecuteNonQuery(IEnumerable`1 migrationCommands, IRelationalConnection connection)
+   at Microsoft.EntityFrameworkCore.Migrations.Internal.Migrator.Migrate(String targetMigration)
+   at Microsoft.EntityFrameworkCore.Design.Internal.MigrationsOperations.UpdateDatabase(String targetMigration, String connectionString, String contextType)
+   at Microsoft.EntityFrameworkCore.Design.OperationExecutor.UpdateDatabaseImpl(String targetMigration, String connectionString, String contextType)
+   at Microsoft.EntityFrameworkCore.Design.OperationExecutor.UpdateDatabase.<>c__DisplayClass0_0.<.ctor>b__0()
+   at Microsoft.EntityFrameworkCore.Design.OperationExecutor.OperationBase.Execute(Action action)
+ClientConnectionId:b3e0e581-2b7c-49d7-896d-18d33980715d
+Error Number:1785,State:0,Class:16
+Introducing FOREIGN KEY constraint 'FK_ElaboracionDetalles_Productos_InsumoId' on table 'ElaboracionDetalles' may cause cycles or multiple cascade paths. Specify ON DELETE NO ACTION or ON UPDATE NO ACTION, or modify other FOREIGN KEY constraints.
+Could not create constraint or index. See previous errors.

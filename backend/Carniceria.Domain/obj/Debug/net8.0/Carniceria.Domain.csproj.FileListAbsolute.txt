@@ -1,0 +1,11 @@
+D:\app_carniceria\backend\Carniceria.Domain\bin\Debug\net8.0\Carniceria.Domain.deps.json
+D:\app_carniceria\backend\Carniceria.Domain\bin\Debug\net8.0\Carniceria.Domain.dll
+D:\app_carniceria\backend\Carniceria.Domain\bin\Debug\net8.0\Carniceria.Domain.pdb
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.AssemblyInfoInputs.cache
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.AssemblyInfo.cs
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.csproj.CoreCompileInputs.cache
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.dll
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\refint\Carniceria.Domain.dll
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.pdb
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\ref\Carniceria.Domain.dll

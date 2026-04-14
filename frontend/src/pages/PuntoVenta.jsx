@@ -1,0 +1,299 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import { toast } from 'react-hot-toast';
+import ReceiptTemplate from '../components/ReceiptTemplate';
+import './PuntoVenta.css';
+
+const PuntoVenta = () => {
+  const receiptRef = useRef();
+  const [activeTab, setActiveTab] = useState('pos'); // 'pos' | 'historial'
+
+  // POS State
+  const [productos, setProductos] = useState([]);
+  const [carrito, setCarrito] = useState([]);
+  const [loadingBalanza, setLoadingBalanza] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // Historial State
+  const [historialVentas, setHistorialVentas] = useState([]);
+
+  // Form Activo
+  const [itemActual, setItemActual] = useState({
+    productoId: '',
+    kg: '',
+    precioVentaKg: ''
+  });
+
+  useEffect(() => {
+    fetchProductos();
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'historial') {
+      fetchHistorial();
+    }
+  }, [activeTab]);
+
+  const fetchProductos = async () => {
+    try {
+      const res = await fetch('/api/mercaderia/productos');
+      if (res.ok) {
+        setProductos(await res.json());
+      }
+    } catch {
+      toast.error('Error al cargar productos');
+    }
+  };
+
+  const fetchHistorial = async () => {
+    try {
+      const res = await fetch('/api/ventas');
+      if (res.ok) {
+        setHistorialVentas(await res.json());
+      }
+    } catch {
+      toast.error('Error al cargar historial de ventas');
+    }
+  };
+
+  const leerBalanza = async () => {
+    setLoadingBalanza(true);
+    try {
+      const res = await fetch('/api/balanza/weight').catch(() => fetch('/api/scale/weight'));
+      if(res && res.ok) {
+         const data = await res.json();
+         const peso = data.weight || data;
+         setItemActual(p => ({ ...p, kg: peso }));
+         toast.success(`Leído: ${peso} kg`);
+      } else {
+         toast.error('Balanza no conectada');
+      }
+    } catch {
+      toast.error('Falló lectura de peso');
+    } finally {
+      setLoadingBalanza(false);
+    }
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setItemActual(p => ({ ...p, [name]: value }));
+  };
+
+  const agregarAlCarrito = () => {
+    if (!itemActual.productoId || !itemActual.kg || !itemActual.precioVentaKg) return;
+    
+    const prod = productos.find(p => p.id === parseInt(itemActual.productoId));
+    if (!prod) return;
+
+    const kg = parseFloat(itemActual.kg);
+    const precio = parseFloat(itemActual.precioVentaKg);
+
+    const nuevoItem = {
+      idUnico: Date.now(), // Para poder eliminar de la lista visual
+      productoId: prod.id,
+      name: prod.nombre,
+      quantity: kg,
+      priceVentaKg: precio,
+      price: (kg * precio) 
+    };
+
+    setCarrito(prev => [...prev, nuevoItem]);
+    
+    // Resetear form para el próximo item, pero mantener el último precio es buena UX a veces.
+    // Lo reseteamos para forzar lectura.
+    setItemActual({ productoId: '', kg: '', precioVentaKg: '' });
+  };
+
+  const quitarDelCarrito = (idUnico) => {
+    setCarrito(prev => prev.filter(i => i.idUnico !== idUnico));
+  };
+
+  const totalCarrito = carrito.reduce((acc, current) => acc + current.price, 0);
+
+  // Hook para imprimir recibo
+  const handlePrint = useReactToPrint({
+    contentRef: receiptRef,
+    documentTitle: `Ticket_Carniceria_${Date.now()}`
+  });
+
+  const finalizarVenta = async () => {
+    if (carrito.length === 0) return toast.error('El carrito está vacío');
+    
+    setIsProcessing(true);
+    try {
+      // El backend registra ventas por item individual (dto: ProductoId, Kg, PrecioVentaKg).
+      // Enviamos en paralelo o en secuencia.
+      const promesasVenta = carrito.map(item => {
+        const dto = {
+          productoId: item.productoId,
+          kg: item.quantity,
+          precioVentaKg: item.priceVentaKg,
+          observacion: 'Venta por mostrador'
+        };
+        return fetch('/api/ventas', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dto)
+        }).then(res => {
+          if (!res.ok) throw new Error('Falló item');
+          return res.json();
+        });
+      });
+
+      await Promise.all(promesasVenta);
+      toast.success('Venta registrada exitosamente', { duration: 3000 });
+      
+      // Imprimir!
+      handlePrint();
+
+      // Limpiar
+      setCarrito([]);
+    } catch {
+      toast.error('Ocurrió un error al procesar algunos artículos');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  return (
+    <div className="pos-container">
+      <div className="pos-header">
+        <div>
+          <h1>Punto de Venta</h1>
+          <p style={{color: '#a0a0a0', margin: '5px 0 0 0'}}>Descuenta stock automáticamente</p>
+        </div>
+      </div>
+
+      <div className="tabs-header">
+        <button className={`tab-btn ${activeTab === 'pos' ? 'active' : ''}`} onClick={() => setActiveTab('pos')}>Caja / Mostrador</button>
+        <button className={`tab-btn ${activeTab === 'historial' ? 'active' : ''}`} onClick={() => setActiveTab('historial')}>Historial de Egresos</button>
+      </div>
+
+      {activeTab === 'pos' && (
+        <div className="pos-layout animate-fade-in">
+          <div className="pos-controls">
+            <h2>Agregar Producto</h2>
+            
+            <div className="form-group">
+              <label>Seleccionar Artículo</label>
+              <select name="productoId" className="form-control" value={itemActual.productoId} onChange={handleInputChange}>
+                <option value="">-- Buscar / Seleccionar --</option>
+                {productos.map(p => (
+                  <option key={p.id} value={p.id}>{p.nombre} (Disp: {p.stockKg} kg)</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label>Balanza (KG)</label>
+                <div className="scale-integration">
+                  <div className="scale-input-wrapper">
+                    <input type="number" name="kg" step="0.001" className="form-control" placeholder="0.000" value={itemActual.kg} onChange={handleInputChange} style={{fontSize: '1.2rem'}} />
+                    <span className="unit">KG</span>
+                  </div>
+                  <button type="button" className="btn-scale" onClick={leerBalanza} disabled={loadingBalanza} style={{padding: '0 15px'}}>Pesar</button>
+                </div>
+              </div>
+              <div className="form-group">
+                <label>Precio Venta / Kg</label>
+                <div style={{position: 'relative'}}>
+                  <span style={{position: 'absolute', left:'16px', top:'50%', transform:'translateY(-50%)', color:'#a0a0a0'}}>$</span>
+                  <input style={{paddingLeft: '35px'}} type="number" name="precioVentaKg" step="0.01" className="form-control" placeholder="0.00" value={itemActual.precioVentaKg} onChange={handleInputChange} />
+                </div>
+              </div>
+            </div>
+
+            <button 
+              type="button" 
+              className="btn-add" 
+              onClick={agregarAlCarrito}
+              disabled={!itemActual.productoId || !itemActual.kg || !itemActual.precioVentaKg}
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+              Cargar al Ticket
+            </button>
+          </div>
+
+          <div className="pos-cart">
+            <h2 style={{margin:0}}>Ticket Actual</h2>
+            
+            <div className="cart-items">
+              {carrito.length === 0 ? (
+                <div style={{textAlign: 'center', color: '#6b7280', marginTop: '40px'}}>El carrito está vacío</div>
+              ) : (
+                carrito.map(item => (
+                  <div className="cart-item" key={item.idUnico}>
+                    <div className="item-details">
+                      <strong>{item.name}</strong>
+                      <span>{item.quantity} kg x ${item.priceVentaKg.toFixed(2)}/kg</span>
+                    </div>
+                    <div className="item-price">${item.price.toFixed(2)}</div>
+                    <button className="btn-remove" onClick={() => quitarDelCarrito(item.idUnico)}>X</button>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="cart-total">
+              <span>TOTAL</span>
+              <span>${totalCarrito.toFixed(2)}</span>
+            </div>
+
+            <button 
+              type="button" 
+              className="btn-checkout" 
+              onClick={finalizarVenta}
+              disabled={carrito.length === 0 || isProcessing}
+            >
+              {isProcessing ? 'Procesando...' : 'Cobrar & Imprimir Ticket'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'historial' && (
+        <div className="history-layout animate-fade-in">
+          <div className="history-table-wrapper">
+            <table className="history-table">
+              <thead>
+                <tr>
+                  <th>Nº</th>
+                  <th>Fecha</th>
+                  <th>Producto</th>
+                  <th>Cantidad Sellada</th>
+                  <th>Precio Venta</th>
+                  <th>Importe Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historialVentas.length === 0 ? (
+                  <tr><td colSpan="6" style={{textAlign:'center', color:'#a0a0a0'}}>Cargando o sin historial</td></tr>
+                ) : (
+                  historialVentas.map((v, i) => (
+                    <tr key={i}>
+                      <td style={{color: '#3b82f6'}}>#{v.id}</td>
+                      <td>{new Date(v.fecha).toLocaleString()}</td>
+                      <td style={{fontWeight: 'bold'}}>{v.productoNombre}</td>
+                      <td>{v.kg} kg</td>
+                      <td>${v.precioVentaKg?.toFixed(2)}/kg</td>
+                      <td style={{color: '#10b981', fontWeight: 'bold'}}>${v.total?.toFixed(2)}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Hidden layout to Print via react-to-print */}
+      <div style={{ display: 'none' }}>
+        <ReceiptTemplate ref={receiptRef} items={carrito} total={totalCarrito} />
+      </div>
+    </div>
+  );
+};
+
+export default PuntoVenta;

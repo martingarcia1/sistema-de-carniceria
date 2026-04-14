@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "dgSpecHash": "vnv1BlRb4Lk=",
+  "success": true,
+  "projectFilePath": "D:\\app_carniceria\\tmp_pdf_reader\\tmp_pdf_reader.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\marti\\.nuget\\packages\\pdfpig\\0.1.14\\pdfpig.0.1.14.nupkg.sha512"
+  ],
+  "logs": []
+}

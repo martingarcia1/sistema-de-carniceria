@@ -1,0 +1,15 @@
+D:\app_carniceria\backend\Carniceria.Application\bin\Debug\net8.0\Carniceria.Application.deps.json
+D:\app_carniceria\backend\Carniceria.Application\bin\Debug\net8.0\Carniceria.Application.dll
+D:\app_carniceria\backend\Carniceria.Application\bin\Debug\net8.0\Carniceria.Application.pdb
+D:\app_carniceria\backend\Carniceria.Application\bin\Debug\net8.0\Carniceria.Domain.dll
+D:\app_carniceria\backend\Carniceria.Application\bin\Debug\net8.0\Carniceria.Domain.pdb
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.csproj.AssemblyReference.cache
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.GeneratedMSBuildEditorConfig.editorconfig
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.AssemblyInfoInputs.cache
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.AssemblyInfo.cs
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.csproj.CoreCompileInputs.cache
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carnicer.264ACD67.Up2Date
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.dll
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\refint\Carniceria.Application.dll
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.pdb
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\ref\Carniceria.Application.dll
