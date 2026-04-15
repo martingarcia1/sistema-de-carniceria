@@ -9,3 +9,4 @@ D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.d
 D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\refint\Carniceria.Domain.dll
 D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.pdb
 D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\ref\Carniceria.Domain.dll
+D:\app_carniceria\backend\Carniceria.Domain\obj\Debug\net8.0\Carniceria.Domain.sourcelink.json

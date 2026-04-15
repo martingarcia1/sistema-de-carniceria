@@ -13,3 +13,4 @@ D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.App
 D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\refint\Carniceria.Application.dll
 D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.pdb
 D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\ref\Carniceria.Application.dll
+D:\app_carniceria\backend\Carniceria.Application\obj\Debug\net8.0\Carniceria.Application.sourcelink.json

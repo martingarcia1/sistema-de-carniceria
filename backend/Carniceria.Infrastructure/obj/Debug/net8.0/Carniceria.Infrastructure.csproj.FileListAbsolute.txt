@@ -17,3 +17,4 @@ D:\app_carniceria\backend\Carniceria.Infrastructure\obj\Debug\net8.0\refint\Carn
 D:\app_carniceria\backend\Carniceria.Infrastructure\obj\Debug\net8.0\Carniceria.Infrastructure.pdb
 D:\app_carniceria\backend\Carniceria.Infrastructure\obj\Debug\net8.0\Carniceria.Infrastructure.genruntimeconfig.cache
 D:\app_carniceria\backend\Carniceria.Infrastructure\obj\Debug\net8.0\ref\Carniceria.Infrastructure.dll
+D:\app_carniceria\backend\Carniceria.Infrastructure\obj\Debug\net8.0\Carniceria.Infrastructure.sourcelink.json
