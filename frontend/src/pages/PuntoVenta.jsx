@@ -24,6 +24,9 @@ const PuntoVenta = () => {
     precioVentaKg: ''
   });
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null); // null = Todos
+
   useEffect(() => {
     fetchProductos();
   }, []);
@@ -78,6 +81,41 @@ const PuntoVenta = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setItemActual(p => ({ ...p, [name]: value }));
+  };
+
+  const handleSearchChange = (e) => {
+    const val = e.target.value;
+    setSearchTerm(val);
+
+    // Escáner Láser dispara esto rápidamente. Revisamos si es match exacto:
+    const productoPorCodigo = productos.find(p => p.codigoBarra && p.codigoBarra === val);
+    if (productoPorCodigo) {
+      setItemActual(prev => ({ 
+        ...prev, 
+        productoId: productoPorCodigo.id,
+        precioVentaKg: productoPorCodigo.precioVentaKg || '' 
+      }));
+      toast.success(`Escaneado: ${productoPorCodigo.nombre}`);
+      setSearchTerm(''); // Limpiar input para próximo escaneo
+    }
+  };
+
+  const productosFiltrados = productos.filter(p => {
+    const matchSearch = p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                       (p.codigoBarra && p.codigoBarra.includes(searchTerm));
+    
+    if (!matchSearch) return false;
+    if (categoriaSeleccionada === null) return true;
+    if (categoriaSeleccionada === 7) return p.tipo === 7 || p.tipo === 2; // Embutidos + Elaborados
+    return p.tipo === categoriaSeleccionada;
+  });
+
+  const seleccionarProductoGrid = (prod) => {
+    setItemActual(p => ({
+      ...p,
+      productoId: prod.id,
+      precioVentaKg: prod.precioVentaKg || ''
+    }));
   };
 
   const agregarAlCarrito = () => {
@@ -176,13 +214,55 @@ const PuntoVenta = () => {
             <h2>Agregar Producto</h2>
             
             <div className="form-group">
-              <label>Seleccionar Artículo</label>
-              <select name="productoId" className="form-control" value={itemActual.productoId} onChange={handleInputChange}>
-                <option value="">-- Buscar / Seleccionar --</option>
-                {productos.map(p => (
-                  <option key={p.id} value={p.id}>{p.nombre} (Disp: {p.stockKg} kg)</option>
+              
+              <input 
+                type="text" 
+                className="form-control" 
+                placeholder="Escanea Código de Barra o Busca por nombre..." 
+                value={searchTerm}
+                onChange={handleSearchChange}
+                style={{marginBottom: '15px'}}
+                autoFocus
+              />
+
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '15px', flexWrap: 'wrap' }}>
+                <button type="button" className={`mode-btn ${categoriaSeleccionada === null ? 'active' : ''}`} onClick={() => setCategoriaSeleccionada(null)} style={{padding:'8px 12px', fontSize:'0.85rem'}}>📦 Todos</button>
+                <button type="button" className={`mode-btn ${categoriaSeleccionada === 1 ? 'active' : ''}`} onClick={() => setCategoriaSeleccionada(1)} style={{padding:'8px 12px', fontSize:'0.85rem'}}>🥩 Vacuno</button>
+                <button type="button" className={`mode-btn ${categoriaSeleccionada === 3 ? 'active' : ''}`} onClick={() => setCategoriaSeleccionada(3)} style={{padding:'8px 12px', fontSize:'0.85rem'}}>🐔 Pollo</button>
+                <button type="button" className={`mode-btn ${categoriaSeleccionada === 4 ? 'active' : ''}`} onClick={() => setCategoriaSeleccionada(4)} style={{padding:'8px 12px', fontSize:'0.85rem'}}>🐷 Cerdo</button>
+                <button type="button" className={`mode-btn ${categoriaSeleccionada === 5 ? 'active' : ''}`} onClick={() => setCategoriaSeleccionada(5)} style={{padding:'8px 12px', fontSize:'0.85rem'}}>🥩 Achuras</button>
+                <button type="button" className={`mode-btn ${categoriaSeleccionada === 6 ? 'active' : ''}`} onClick={() => setCategoriaSeleccionada(6)} style={{padding:'8px 12px', fontSize:'0.85rem'}}>🧊 Congel</button>
+                <button type="button" className={`mode-btn ${categoriaSeleccionada === 7 ? 'active' : ''}`} onClick={() => setCategoriaSeleccionada(7)} style={{padding:'8px 12px', fontSize:'0.85rem'}}>🌭 Embut</button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '10px', maxHeight: '280px', overflowY: 'auto', paddingRight: '5px', marginBottom: '15px' }}>
+                {productosFiltrados.map(p => (
+                  <button 
+                    key={p.id} 
+                    type="button"
+                    onClick={() => seleccionarProductoGrid(p)}
+                    style={{ 
+                      padding: '10px', 
+                      borderRadius: '8px', 
+                      border: itemActual.productoId == p.id ? '2px solid #3b82f6' : '1px solid #2d303a',
+                      background: itemActual.productoId == p.id ? 'rgba(59, 130, 246, 0.15)' : '#181a20',
+                      color: itemActual.productoId == p.id ? '#3b82f6' : '#f3f4f6',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      textAlign: 'center',
+                      minHeight: '80px',
+                      transition: 'all 0.2s'
+                    }}>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 600, lineHeight: '1.2', marginBottom: '6px' }}>{p.nombre}</span>
+                    <span style={{ fontSize: '0.75rem', color: p.stockKg > 0 ? '#10b981' : '#ef4444' }}>
+                      {p.stockKg} kg
+                    </span>
+                  </button>
                 ))}
-              </select>
+              </div>
             </div>
 
             <div className="form-row">

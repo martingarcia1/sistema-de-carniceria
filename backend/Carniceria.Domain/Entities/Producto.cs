@@ -8,6 +8,8 @@ public class Producto
     public string Nombre { get; set; } = string.Empty;
     public TipoProducto Tipo { get; set; }
     public decimal StockKg { get; set; }
+    public decimal PrecioVentaKg { get; set; }
+    public string? CodigoBarra { get; set; }
     public bool Activo { get; set; } = true;
 
     public ICollection<Ingreso> Ingresos { get; set; } = new List<Ingreso>();

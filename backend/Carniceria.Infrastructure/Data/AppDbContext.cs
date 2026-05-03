@@ -22,7 +22,9 @@ public class AppDbContext : DbContext, IAppDbContext
         {
             e.HasKey(p => p.Id);
             e.Property(p => p.Nombre).IsRequired().HasMaxLength(100);
+            e.Property(p => p.CodigoBarra).HasMaxLength(50);
             e.Property(p => p.StockKg).HasPrecision(10, 3);
+            e.Property(p => p.PrecioVentaKg).HasPrecision(12, 2);
         });
 
         modelBuilder.Entity<Ingreso>(e =>

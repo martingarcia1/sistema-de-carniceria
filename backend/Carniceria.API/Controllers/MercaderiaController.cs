@@ -32,4 +32,22 @@ public class MercaderiaController : ControllerBase
     [HttpPost("ingresos")]
     public async Task<IActionResult> RegistrarIngreso([FromBody] MercaderiaIngresoDto dto)
         => Ok(await _service.RegistrarIngresoAsync(dto));
+
+    [HttpPost("ingresos/bulk")]
+    public async Task<IActionResult> RegistrarIngresoLote([FromBody] List<MercaderiaIngresoDto> dtos)
+        => Ok(await _service.RegistrarIngresoLoteAsync(dtos));
+
+    [HttpPost("desposte")]
+    public async Task<IActionResult> RegistrarDesposte([FromBody] DesposteRequestDto dto)
+    {
+        await _service.RegistrarDesposteAsync(dto);
+        return Ok(new { mensaje = "Desposte guardado y stock actualizado correctamente." });
+    }
+
+    [HttpPost("seed-cortes")]
+    public async Task<IActionResult> SeedCortes()
+    {
+        await _service.SeedCortesDesposteAsync();
+        return Ok(new { mensaje = "Los 31 cortes base fueron creados en el catálogo." });
+    }
 }
