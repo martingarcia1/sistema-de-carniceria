@@ -15,7 +15,8 @@ public class MappingProfile : Profile
             .ForMember(d => d.ProductoNombre, o => o.MapFrom(s => s.Producto.Nombre));
 
         CreateMap<Venta, VentaDto>()
-            .ForMember(d => d.ProductoNombre, o => o.MapFrom(s => s.Producto.Nombre));
+            .ForMember(d => d.ProductoNombre, o => o.MapFrom(s => s.Producto.Nombre))
+            .ForMember(d => d.MetodoPagoDescripcion, o => o.MapFrom(s => s.MetodoPago.ToString()));
 
         CreateMap<CrearVentaDto, Venta>()
             .ForMember(d => d.Total, o => o.MapFrom(s => s.Kg * s.PrecioVentaKg));

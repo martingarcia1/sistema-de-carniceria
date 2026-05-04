@@ -11,11 +11,15 @@ const PuntoVenta = () => {
   // POS State
   const [productos, setProductos] = useState([]);
   const [carrito, setCarrito] = useState([]);
+  const [metodoPagoGlobal, setMetodoPagoGlobal] = useState(1); // 1=Efectivo, 2=Tarjeta, 3=MP, 4=Transf
   const [loadingBalanza, setLoadingBalanza] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
   // Historial State
   const [historialVentas, setHistorialVentas] = useState([]);
+
+  // Caja State
+  const [cajaData, setCajaData] = useState(null);
 
   // Form Activo
   const [itemActual, setItemActual] = useState({
@@ -34,6 +38,8 @@ const PuntoVenta = () => {
   useEffect(() => {
     if (activeTab === 'historial') {
       fetchHistorial();
+    } else if (activeTab === 'caja') {
+      fetchCajaDiaria();
     }
   }, [activeTab]);
 
@@ -56,6 +62,17 @@ const PuntoVenta = () => {
       }
     } catch {
       toast.error('Error al cargar historial de ventas');
+    }
+  };
+
+  const fetchCajaDiaria = async () => {
+    try {
+      const res = await fetch('/api/ventas/caja-diaria');
+      if (res.ok) {
+        setCajaData(await res.json());
+      }
+    } catch {
+      toast.error('Error al cargar datos de la caja');
     }
   };
 
@@ -167,7 +184,8 @@ const PuntoVenta = () => {
           productoId: item.productoId,
           kg: item.quantity,
           precioVentaKg: item.priceVentaKg,
-          observacion: 'Venta por mostrador'
+          observacion: 'Venta por mostrador',
+          metodoPago: metodoPagoGlobal
         };
         return fetch('/api/ventas', {
           method: 'POST',
@@ -206,6 +224,7 @@ const PuntoVenta = () => {
       <div className="tabs-header">
         <button className={`tab-btn ${activeTab === 'pos' ? 'active' : ''}`} onClick={() => setActiveTab('pos')}>Caja / Mostrador</button>
         <button className={`tab-btn ${activeTab === 'historial' ? 'active' : ''}`} onClick={() => setActiveTab('historial')}>Historial de Egresos</button>
+        <button className={`tab-btn ${activeTab === 'caja' ? 'active' : ''}`} onClick={() => setActiveTab('caja')}>Cierre de Caja Diaria</button>
       </div>
 
       {activeTab === 'pos' && (
@@ -321,6 +340,16 @@ const PuntoVenta = () => {
               <span>${totalCarrito.toFixed(2)}</span>
             </div>
 
+            <div style={{ marginBottom: '15px', marginTop: '10px' }}>
+              <label style={{ display: 'block', marginBottom: '8px', color: '#9ca3af', fontSize: '0.9rem' }}>Método de Pago</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                <button type="button" className={`mode-btn ${metodoPagoGlobal === 1 ? 'active' : ''}`} onClick={() => setMetodoPagoGlobal(1)} style={{padding:'10px', fontSize:'0.9rem'}}>💵 Efectivo</button>
+                <button type="button" className={`mode-btn ${metodoPagoGlobal === 2 ? 'active' : ''}`} onClick={() => setMetodoPagoGlobal(2)} style={{padding:'10px', fontSize:'0.9rem'}}>💳 Tarjeta</button>
+                <button type="button" className={`mode-btn ${metodoPagoGlobal === 3 ? 'active' : ''}`} onClick={() => setMetodoPagoGlobal(3)} style={{padding:'10px', fontSize:'0.9rem'}}>📱 M. Pago</button>
+                <button type="button" className={`mode-btn ${metodoPagoGlobal === 4 ? 'active' : ''}`} onClick={() => setMetodoPagoGlobal(4)} style={{padding:'10px', fontSize:'0.9rem'}}>🏦 Transf.</button>
+              </div>
+            </div>
+
             <button 
               type="button" 
               className="btn-checkout" 
@@ -342,14 +371,15 @@ const PuntoVenta = () => {
                   <th>Nº</th>
                   <th>Fecha</th>
                   <th>Producto</th>
-                  <th>Cantidad Sellada</th>
+                  <th>Cantidad</th>
                   <th>Precio Venta</th>
+                  <th>Método Pago</th>
                   <th>Importe Total</th>
                 </tr>
               </thead>
               <tbody>
                 {historialVentas.length === 0 ? (
-                  <tr><td colSpan="6" style={{textAlign:'center', color:'#a0a0a0'}}>Cargando o sin historial</td></tr>
+                  <tr><td colSpan="7" style={{textAlign:'center', color:'#a0a0a0'}}>Cargando o sin historial</td></tr>
                 ) : (
                   historialVentas.map((v, i) => (
                     <tr key={i}>
@@ -358,6 +388,7 @@ const PuntoVenta = () => {
                       <td style={{fontWeight: 'bold'}}>{v.productoNombre}</td>
                       <td>{v.kg} kg</td>
                       <td>${v.precioVentaKg?.toFixed(2)}/kg</td>
+                      <td>{v.metodoPagoDescripcion || 'Efectivo'}</td>
                       <td style={{color: '#10b981', fontWeight: 'bold'}}>${v.total?.toFixed(2)}</td>
                     </tr>
                   ))
@@ -365,6 +396,51 @@ const PuntoVenta = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {activeTab === 'caja' && (
+        <div className="caja-layout animate-fade-in" style={{ padding: '20px' }}>
+          <h2 style={{marginTop: 0}}>Cierre de Caja Diaria (Z-Read)</h2>
+          <p style={{color: '#9ca3af', marginBottom: '30px'}}>Resumen de ingresos agrupados por método de pago para el día de hoy.</p>
+          
+          {!cajaData ? (
+            <div style={{color: '#9ca3af'}}>Cargando métricas de la caja...</div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px' }}>
+              
+              <div className="kpi-card" style={{ borderTop: '4px solid #10b981', background: '#181a20', padding: '20px', borderRadius: '10px' }}>
+                <h3 style={{ margin: '0 0 10px 0', color: '#9ca3af', fontSize: '1rem' }}>💵 Efectivo (En Cajón)</h3>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#10b981' }}>${cajaData.totalEfectivo.toLocaleString('es-AR', {minimumFractionDigits: 2})}</div>
+                <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', color: '#6b7280' }}>Dinero físico a rendir</p>
+              </div>
+
+              <div className="kpi-card" style={{ borderTop: '4px solid #3b82f6', background: '#181a20', padding: '20px', borderRadius: '10px' }}>
+                <h3 style={{ margin: '0 0 10px 0', color: '#9ca3af', fontSize: '1rem' }}>💳 Tarjetas</h3>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#3b82f6' }}>${cajaData.totalTarjeta.toLocaleString('es-AR', {minimumFractionDigits: 2})}</div>
+                <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', color: '#6b7280' }}>Débito y Crédito</p>
+              </div>
+
+              <div className="kpi-card" style={{ borderTop: '4px solid #009ee3', background: '#181a20', padding: '20px', borderRadius: '10px' }}>
+                <h3 style={{ margin: '0 0 10px 0', color: '#9ca3af', fontSize: '1rem' }}>📱 Mercado Pago</h3>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#009ee3' }}>${cajaData.totalMercadoPago.toLocaleString('es-AR', {minimumFractionDigits: 2})}</div>
+                <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', color: '#6b7280' }}>QR y Transferencias MP</p>
+              </div>
+
+              <div className="kpi-card" style={{ borderTop: '4px solid #8b5cf6', background: '#181a20', padding: '20px', borderRadius: '10px' }}>
+                <h3 style={{ margin: '0 0 10px 0', color: '#9ca3af', fontSize: '1rem' }}>🏦 Transferencias</h3>
+                <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#8b5cf6' }}>${cajaData.totalTransferencia.toLocaleString('es-AR', {minimumFractionDigits: 2})}</div>
+                <p style={{ margin: '5px 0 0 0', fontSize: '0.8rem', color: '#6b7280' }}>Bancos CBU/CVU</p>
+              </div>
+
+              <div className="kpi-card" style={{ gridColumn: '1 / -1', borderTop: '4px solid #f59e0b', background: 'rgba(245, 158, 11, 0.05)', padding: '20px', borderRadius: '10px', marginTop: '10px' }}>
+                <h3 style={{ margin: '0 0 10px 0', color: '#f59e0b', fontSize: '1.2rem' }}>💰 TOTAL RECAUDADO</h3>
+                <div style={{ fontSize: '2.5rem', fontWeight: 'bold', color: '#f59e0b' }}>${cajaData.totalGeneral.toLocaleString('es-AR', {minimumFractionDigits: 2})}</div>
+                <p style={{ margin: '5px 0 0 0', fontSize: '0.9rem', color: '#9ca3af' }}>Suma de todos los medios de pago</p>
+              </div>
+
+            </div>
+          )}
         </div>
       )}
 

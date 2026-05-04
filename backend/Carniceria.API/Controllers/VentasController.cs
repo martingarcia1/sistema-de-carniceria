@@ -29,6 +29,10 @@ public class VentasController : ControllerBase
     public async Task<IActionResult> RegistrarVenta([FromBody] CrearVentaDto dto)
         => Ok(await _service.RegistrarVentaAsync(dto));
 
+    [HttpGet("caja-diaria")]
+    public async Task<IActionResult> ObtenerCajaDiaria([FromQuery] DateTime? fecha)
+        => Ok(await _service.ObtenerCajaDiariaAsync(fecha ?? DateTime.Today));
+
     [HttpPost("{id}/recibo")]
     public async Task<IActionResult> ImprimirRecibo(int id)
     {

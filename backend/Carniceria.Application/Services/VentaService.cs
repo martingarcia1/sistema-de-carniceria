@@ -11,6 +11,7 @@ public interface IVentaService
     Task<List<VentaDto>> ObtenerVentasAsync(DateTime? desde, DateTime? hasta, int? productoId);
     Task<VentaDto> RegistrarVentaAsync(CrearVentaDto dto);
     Task<ReciboDto> ObtenerReciboAsync(int ventaId);
+    Task<CajaDiariaDto> ObtenerCajaDiariaAsync(DateTime fecha);
 }
 
 public class VentaService : IVentaService
@@ -69,6 +70,26 @@ public class VentaService : IVentaService
             PrecioKg = venta.PrecioVentaKg,
             Total = venta.Total,
             Fecha = venta.Fecha
+        };
+    }
+
+    public async Task<CajaDiariaDto> ObtenerCajaDiariaAsync(DateTime fecha)
+    {
+        var inicioDia = fecha.Date;
+        var finDia = inicioDia.AddDays(1).AddTicks(-1);
+
+        var ventasDelDia = await _db.Ventas
+            .Where(v => v.Fecha >= inicioDia && v.Fecha <= finDia)
+            .ToListAsync();
+
+        return new CajaDiariaDto
+        {
+            FechaConsulta = inicioDia,
+            TotalEfectivo = ventasDelDia.Where(v => v.MetodoPago == Carniceria.Domain.Enums.MetodoPago.Efectivo).Sum(v => v.Total),
+            TotalTarjeta = ventasDelDia.Where(v => v.MetodoPago == Carniceria.Domain.Enums.MetodoPago.Tarjeta).Sum(v => v.Total),
+            TotalMercadoPago = ventasDelDia.Where(v => v.MetodoPago == Carniceria.Domain.Enums.MetodoPago.MercadoPago).Sum(v => v.Total),
+            TotalTransferencia = ventasDelDia.Where(v => v.MetodoPago == Carniceria.Domain.Enums.MetodoPago.Transferencia).Sum(v => v.Total),
+            TotalGeneral = ventasDelDia.Sum(v => v.Total)
         };
     }
 }

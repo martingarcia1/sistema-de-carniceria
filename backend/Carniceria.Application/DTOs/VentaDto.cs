@@ -6,6 +6,7 @@ public class CrearVentaDto
     public decimal Kg { get; set; }
     public decimal PrecioVentaKg { get; set; }
     public string? Observacion { get; set; }
+    public int MetodoPago { get; set; } = 1;
 }
 
 public class VentaDto
@@ -18,4 +19,5 @@ public class VentaDto
     public decimal Total { get; set; }
     public DateTime Fecha { get; set; }
     public string? Observacion { get; set; }
+    public string MetodoPagoDescripcion { get; set; } = string.Empty;
 }

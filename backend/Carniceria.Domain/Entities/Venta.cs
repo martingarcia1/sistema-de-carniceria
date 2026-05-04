@@ -10,6 +10,7 @@ public class Venta
     public decimal Total { get; set; }
     public DateTime Fecha { get; set; } = DateTime.Now;
     public string? Observacion { get; set; }
+    public Carniceria.Domain.Enums.MetodoPago MetodoPago { get; set; } = Carniceria.Domain.Enums.MetodoPago.Efectivo;
 
     public Producto Producto { get; set; } = null!;
 }
