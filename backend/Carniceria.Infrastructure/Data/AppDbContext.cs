@@ -40,6 +40,7 @@ public class AppDbContext : DbContext, IAppDbContext
         {
             e.HasKey(v => v.Id);
             e.Property(v => v.Kg).HasPrecision(10, 3);
+            e.Property(v => v.PrecioCostoKg).HasPrecision(12, 2);
             e.Property(v => v.PrecioVentaKg).HasPrecision(12, 2);
             e.Property(v => v.Total).HasPrecision(14, 2);
             e.HasOne(v => v.Producto).WithMany(p => p.Ventas).HasForeignKey(v => v.ProductoId);

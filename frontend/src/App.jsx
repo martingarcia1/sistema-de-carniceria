@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import PuntoVenta from './pages/PuntoVenta';
 import IngresoMercaderia from './pages/IngresoMercaderia';
+import Dashboard from './pages/Dashboard';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
@@ -15,6 +16,9 @@ function App() {
           <ul style={{ listStyle: 'none', padding: 0 }}>
             <li style={{ margin: '20px 0' }}>
               <Link to="/" style={{ color: '#9ca3af', textDecoration: 'none', fontWeight: 500, fontSize: '1.05rem', transition: 'color 0.2s' }} onMouseOver={e => e.target.style.color = '#fff'} onMouseOut={e => e.target.style.color = '#9ca3af'}>🏠 Inicio</Link>
+            </li>
+            <li style={{ margin: '20px 0' }}>
+              <Link to="/dashboard" style={{ color: '#3b82f6', textDecoration: 'none', fontWeight: 500, fontSize: '1.05rem', transition: 'color 0.2s' }} onMouseOver={e => e.target.style.color = '#60a5fa'} onMouseOut={e => e.target.style.color = '#3b82f6'}>📊 Dashboard (Ganancias)</Link>
             </li>
             <li style={{ margin: '20px 0', color: '#f3f4f6', fontWeight: 600 }}>
               📥 Sector Ingresos
@@ -35,6 +39,7 @@ function App() {
         <main style={{ flex: 1, backgroundColor: '#0f1014', overflowY: 'auto' }}>
           <Routes>
             <Route path="/" element={<div style={{padding: '40px', color: '#f3f4f6'}}><h1>Panel Principal</h1><p>Seleccione una opción en el menú lateral.</p></div>} />
+            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/ingreso/:categoria?" element={<IngresoMercaderia />} />
             <Route path="/pos" element={<PuntoVenta />} />
           </Routes>

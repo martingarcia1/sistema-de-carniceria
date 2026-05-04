@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Carniceria.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7d8092a58ad33e0412e26a74fe9b76b8ff1944eb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+49db0d0ee2bc22844648c0349942382618bfc9a5")]
 [assembly: System.Reflection.AssemblyProductAttribute("Carniceria.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Carniceria.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

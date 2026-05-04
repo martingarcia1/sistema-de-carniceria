@@ -40,6 +40,14 @@ public class VentaService : IVentaService
     {
         var venta = _mapper.Map<Venta>(dto);
         venta.Fecha = DateTime.Now;
+
+        var ultimoIngreso = await _db.Ingresos
+            .Where(i => i.ProductoId == dto.ProductoId)
+            .OrderByDescending(i => i.Fecha)
+            .FirstOrDefaultAsync();
+            
+        venta.PrecioCostoKg = ultimoIngreso?.PrecioCostoKg ?? 0;
+
         _db.Ventas.Add(venta);
         await _stock.DescontarStockAsync(dto.ProductoId, dto.Kg);
         await _db.SaveChangesAsync();

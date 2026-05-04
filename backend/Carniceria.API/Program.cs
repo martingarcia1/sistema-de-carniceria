@@ -21,6 +21,7 @@ builder.Services.AddScoped<IVentaService, VentaService>();
 builder.Services.AddScoped<IElaboracionService, ElaboracionService>();
 builder.Services.AddScoped<IMetricasService, MetricasService>();
 builder.Services.AddScoped<IStockService, StockService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 // --- Hardware ---
 builder.Services.AddSingleton<IBalanzaService, BalanzaSerialService>();
